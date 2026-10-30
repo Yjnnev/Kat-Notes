@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { db } from "../firebase.js";
@@ -20,6 +21,7 @@ export function Todo() {
   const [todos, setTodos] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [deletingIds, setDeletingIds] = useState([]);
 
   async function loadTodos() {
     const q = query(collection(db, "todos"), orderBy("createdAt", "asc"));
