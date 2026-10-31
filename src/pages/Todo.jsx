@@ -8,6 +8,7 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 import { db } from "../firebase.js";
@@ -27,6 +28,7 @@ export function Todo() {
   const [newListName, setNewListName] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [modalIsVisible, setModalIsVisible] = useState(false);
+  const [deletingIds, setDeletingIds] = useState([]);
 
   async function loadTodos() {
     const q = query(collection(db, "todos"), orderBy("createdAt", "asc"));
@@ -114,6 +116,26 @@ export function Todo() {
     } catch (error) {
       console.error(error);
       await loadTodos();
+    }
+  }
+
+  async function deleteTodo(id) {
+    if (deletingIds.includes(id)) return;
+
+    const deletedTodo = todos.find((todo) => todo.id === id);
+    if (!deletedTodo) return;
+
+    setDeletingIds((prev) => [...prev, id]);
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+    setEditingId((currentId) => (currentId === id ? null : currentId));
+
+    try {
+      await deleteDoc(doc(db, "todos", id));
+    } catch (e) {
+      console.error(e);
+      await loadTodos();
+    } finally {
+      setDeletingIds((prev) => prev.filter((deletingId) => deletingId !== id));
     }
   }
 
@@ -223,13 +245,33 @@ export function Todo() {
           <ul>
             {visibleTodos.map((todo) => (
               <li key={todo.id}>
-                <TodoItem
-                  todo={todo}
-                  isEditing={todo.id === editingId}
-                  onEdit={() => setEditingId(todo.id)}
-                  onSave={(newText) => editTodo(todo.id, newText)}
-                  onCancel={() => setEditingId(null)}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <TodoItem
+                      todo={todo}
+                      isEditing={todo.id === editingId}
+                      onEdit={() => setEditingId(todo.id)}
+                      onSave={(newText) => editTodo(todo.id, newText)}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  </div>
+                  <button
+                    class="btn"
+                    type="button"
+                    onClick={() => deleteTodo(todo.id)}
+                    disabled={deletingIds.includes(todo.id)}
+                    aria-label={`Delete ${todo.text}`}
+                  >
+                    {deletingIds.includes(todo.id) ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
