@@ -245,15 +245,15 @@ export function Todo() {
           <ul>
             {visibleTodos.map((todo) => (
               <li key={todo.id}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "0.75rem",
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <TodoItem
                       todo={todo}
                       isEditing={todo.id === editingId}
@@ -261,17 +261,17 @@ export function Todo() {
                       onSave={(newText) => editTodo(todo.id, newText)}
                       onCancel={() => setEditingId(null)}
                     />
+                  </div>
+                  <button
+                    class="btn"
+                    type="button"
+                    onClick={() => deleteTodo(todo.id)}
+                    disabled={deletingIds.includes(todo.id)}
+                    aria-label={`Delete ${todo.text}`}
+                  >
+                    {deletingIds.includes(todo.id) ? "Deleting..." : "Delete"}
+                  </button>
                 </div>
-                <button
-                  class="btn"
-                  type="button"
-                  onClick={() => deleteTodo(todo.id)}
-                  disabled={deletingIds.includes(todo.id)}
-                  aria-label={`Delete ${todo.text}`}
-                >
-                  {deletingIds.includes(todo.id) ? "Deleting..." : "Delete"}
-                </button>
-              </div>
               </li>
             ))}
           </ul>
